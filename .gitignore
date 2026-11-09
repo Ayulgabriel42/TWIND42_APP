@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.streamlit/secrets.toml
+
+# Salida local de `python generar_datos.py` / `python procesar.py` (uso por línea de comandos,
+# fuera de la app Streamlit). No la usa app.py ni hace falta para desplegar.
+salida/
+
+# Configuración local de Claude Code (no es parte de la app).
+.claude/

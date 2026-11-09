@@ -1,0 +1,4 @@
+id_ensayo,fecha,modo_operacion,carga_w,estado_inicial_bateria,observaciones
+SIM-EOL-01,2026-11-07,eolico,20,70,DATOS SIMULADOS: prueba de software; batería cargando
+SIM-FV-01,2026-11-07,fotovoltaico,20,70,DATOS SIMULADOS: prueba de software; batería cargando
+SIM-HIB-01,2026-11-07,hibrido,20,70,DATOS SIMULADOS: prueba de software; batería cargando

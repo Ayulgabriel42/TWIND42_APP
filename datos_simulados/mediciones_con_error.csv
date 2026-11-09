@@ -1,0 +1,2 @@
+id_medicion,id_ensayo,fecha_hora,punto_medido,rpm,tension_v,corriente_a,potencia_w,energia_wh,velocidad_viento,irradiancia
+ERR-01,SIM-EOL-01,2026-11-07 10:00:00,carga,,dato_invalido,1.67,,,,

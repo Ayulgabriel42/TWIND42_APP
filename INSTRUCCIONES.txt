@@ -1,0 +1,116 @@
+TWIND42 — DEMOSTRACIÓN DEL PROCESAMIENTO DE DATOS
+TFG de Gabriel Ayul | Versión de entrega preparada el 08/11/2026
+
+1. ALCANCE DE ESTA VERSIÓN
+
+El programa lee archivos CSV, valida registros, calcula potencia y energía,
+presenta un balance energético y genera gráficos en un informe HTML local.
+Se incluye una prueba que comprueba el rechazo de un dato de tensión inválido.
+
+Todos los datos de entrada y resultados incluidos son SIMULADOS. El programa
+no adquiere señales de sensores ni se comunica con un ESP32. No incluye
+firmware de adquisición ni demuestra funcionamiento físico del prototipo.
+
+2. INTERFAZ STREAMLIT Y REQUISITOS
+
+La nueva interfaz presenta Configuración, Visualización y Resultados.
+Para usarla, se recomienda Python 3.12. Desde la carpeta del programa:
+
+   python -m pip install -r requirements.txt
+   python -m streamlit run app.py
+
+La primera instalación requiere internet. Luego la interfaz local funciona
+sin conexión. No requiere ESP32. En Configuración pulse "Cargar y procesar
+ejemplos" y navegue mediante el menú lateral. Los datos son simulados.
+Puede guardar el porcentaje inicial de batería y observaciones en la sesión
+y descargar ensayos.csv. Esto no modifica las mediciones ni calcula un
+porcentaje final. La reproducción es acelerada (60 veces), no adquisición.
+También se pueden cargar ambos CSV de prueba y mostrar el rechazo de un dato
+inválido. Al fallar una carga se retiran los resultados anteriores de la sesión.
+Los resultados deben descargarse para conservarlos después de cerrar la sesión.
+Los archivos originales no se sobrescriben. La eventual versión publicada
+necesita internet y procesa los CSV en el servidor donde se aloje.
+
+Para usar únicamente el procesador original, sin la interfaz:
+
+Computadora con Python 3.10 o posterior y un navegador web.
+VS Code es opcional. No se necesitan paquetes externos ni hardware adicional.
+Una vez instalado Python, la ejecución no requiere conexión a internet.
+
+3. CÓMO EJECUTARLO
+
+a) Si recibió un ZIP, extraiga todo su contenido antes de ejecutar los archivos.
+b) Abra la carpeta TWIND42_Demo_2026-11-08 en VS Code, o abra una terminal
+   en esa carpeta. Allí deben encontrarse generar_datos.py y procesar.py.
+c) Ejecute estos comandos, uno por vez:
+
+   python generar_datos.py
+   python procesar.py
+   python probar_error.py
+
+En Windows, si el comando python no se reconoce, pruebe py en su lugar.
+Si ninguno funciona, instale Python antes de continuar.
+
+d) Abra salida/resultados.html con un navegador. Desde PowerShell puede usar:
+
+   ii .\salida\resultados.html
+
+Si vuelve a ejecutar el procesamiento, recargue la página con Ctrl + F5.
+
+4. ARCHIVOS
+
+generar_datos.py: crea los CSV ficticios y el ejemplo con error.
+procesar.py: valida y procesa los CSV; genera las salidas.
+probar_error.py: comprueba que el dato inválido se rechace.
+datos_simulados/ensayos.csv: configuración de las pruebas.
+datos_simulados/mediciones.csv: valores de tensión, corriente y otras variables.
+datos_simulados/mediciones_con_error.csv: caso de prueba deliberadamente inválido.
+salida/mediciones_procesadas.csv: potencia y energía calculadas por registro.
+salida/resumen.csv: energía final por ensayo y punto.
+salida/balance.csv: balance por ensayo.
+salida/resultados.html: tablas y seis gráficos locales.
+
+generar_datos.py reemplaza los archivos de ejemplo en datos_simulados.
+procesar.py reemplaza las salidas cuando completa correctamente la validación.
+No coloque datos reales en estas carpetas de demostración.
+
+5. CONVENCIONES Y RESULTADOS ESPERADOS
+
+CSV en UTF-8, separado por comas y con punto decimal.
+Se incluyen tres pruebas simuladas: eólica, fotovoltaica e híbrida.
+Cada una representa 60 minutos, con muestras cada 5 segundos: 721 instantes
+por punto, incluidos el inicio y el final; 8.652 registros en total.
+
+El estado inicial de la batería es 70 %. No se calcula su porcentaje final:
+para ello harían falta su capacidad y un modelo del almacenamiento.
+Corriente positiva en batería: carga. Corriente negativa: descarga.
+En estos ejemplos la batería está cargando durante toda la prueba.
+La energía de batería se refiere al intercambio eléctrico en ese punto.
+
+La lámpara tiene tensión simulada de 12 V y corriente de 1,67 A:
+12 × 1,67 = 20,04 W; durante una hora, 20,04 Wh.
+La integración se realiza por la regla trapezoidal entre muestras.
+
+Balance ideal sin pérdidas para verificar el software:
+
+Modo          Fuentes (Wh)   Carga (Wh)   Batería (Wh)   Residuo (Wh)
+Eólico             28,80        20,04          8,76            0,00
+Fotovoltaico       27,60        20,04          7,56            0,00
+Híbrido            30,60        20,04         10,56            0,00
+
+El residuo cero es consecuencia de cómo se construyeron los datos ficticios;
+no demuestra eficiencia real ni valida el modelo físico del sistema.
+Las oscilaciones de generación son artificiales, no curvas de los proveedores.
+
+probar_error.py debe mostrar:
+Error detectado correctamente: Fila 2: tension_v debe ser numérico; se recibió 'dato_invalido'
+PRUEBA SUPERADA: el archivo inválido fue rechazado.
+
+Esta prueba no modifica los resultados correctos. Rechazar este caso no
+constituye una validación exhaustiva de todos los posibles errores.
+
+6. PENDIENTES DEL PROYECTO
+
+Adquisición mediante ESP32, sensores, calibración, integración física y ensayos
+experimentales. Esta entrega verifica el procesamiento con entradas simuladas.
+El uso futuro de mediciones reales requerirá nuevas comprobaciones.
