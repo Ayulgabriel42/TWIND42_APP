@@ -1,116 +1,274 @@
-TWIND42 — DEMOSTRACIÓN DEL PROCESAMIENTO DE DATOS
-TFG de Gabriel Ayul | Versión de entrega preparada el 08/11/2026
+TWIND42 — INSTRUCCIONES DE INSTALACIÓN Y EJECUCIÓN
+TFG de Gabriel Ayul | Licenciatura en Inteligencia Artificial y Robótica
+Versión de este instructivo preparada el 09/11/2026
 
-1. ALCANCE DE ESTA VERSIÓN
+Repositorio: https://github.com/Ayulgabriel42/TWIND42_APP
 
-El programa lee archivos CSV, valida registros, calcula potencia y energía,
-presenta un balance energético y genera gráficos en un informe HTML local.
-Se incluye una prueba que comprueba el rechazo de un dato de tensión inválido.
+0. ALCANCE DE ESTA VERSIÓN
 
-Todos los datos de entrada y resultados incluidos son SIMULADOS. El programa
-no adquiere señales de sensores ni se comunica con un ESP32. No incluye
-firmware de adquisición ni demuestra funcionamiento físico del prototipo.
+TWIND42 es una aplicación web (Python + Streamlit) que carga, procesa y visualiza
+archivos CSV de un sistema híbrido eólico-fotovoltaico simulado, con un simulador de
+escenarios hipotéticos de generación. Todos los datos de entrada y de salida que trae
+esta versión son SIMULADOS. El programa no adquiere señales de sensores ni se comunica
+con un ESP32 ni con ningún otro hardware. La integración física, la calibración de
+sensores y la validación experimental del prototipo energético permanecen pendientes.
 
-2. INTERFAZ STREAMLIT Y REQUISITOS
+Este instructivo prioriza la ejecución de la aplicación web (la vía principal de uso).
+El procesador por línea de comandos (generar_datos.py / procesar.py) se conserva como
+funcionalidad complementaria, descripta en la sección 9.
 
-La nueva interfaz presenta Configuración, Visualización y Resultados.
-Para usarla, se recomienda Python 3.12. Desde la carpeta del programa:
+1. REQUISITOS DE HARDWARE Y SOFTWARE
 
-   python -m pip install -r requirements.txt
-   python -m streamlit run app.py
+- Una computadora con Windows, macOS o Linux (desarrollada y probada en Windows; en
+  macOS/Linux los comandos de Python son equivalentes pero no fueron verificados en
+  esta entrega).
+- Python 3.12 instalado (recomendado; ver sección 2). El procesador por línea de
+  comandos, usado solo, funciona con Python 3.10 o posterior.
+- Conexión a internet únicamente para la descarga inicial del repositorio y de las
+  dependencias. Una vez instalado todo, la aplicación funciona sin conexión.
+- Un navegador web moderno (Chrome, Edge, Firefox).
+- Unos 200 MB libres en disco para el entorno virtual y sus dependencias.
+- No se necesita hardware adicional (ni ESP32, ni sensores): todos los datos son
+  archivos CSV simulados, incluidos en el repositorio.
 
-La primera instalación requiere internet. Luego la interfaz local funciona
-sin conexión. No requiere ESP32. En Configuración pulse "Cargar y procesar
-ejemplos" y navegue mediante el menú lateral. Los datos son simulados.
-Puede guardar el porcentaje inicial de batería y observaciones en la sesión
-y descargar ensayos.csv. Esto no modifica las mediciones ni calcula un
-porcentaje final. La reproducción es acelerada (60 veces), no adquisición.
-También se pueden cargar ambos CSV de prueba y mostrar el rechazo de un dato
-inválido. Al fallar una carga se retiran los resultados anteriores de la sesión.
-Los resultados deben descargarse para conservarlos después de cerrar la sesión.
-Los archivos originales no se sobrescriben. La eventual versión publicada
-necesita internet y procesa los CSV en el servidor donde se aloje.
+2. INSTALAR PYTHON Y VERIFICAR SU VERSIÓN
 
-Para usar únicamente el procesador original, sin la interfaz:
+Si no tiene Python instalado, descárguelo desde https://www.python.org/downloads/
+(marcar la opción "Add Python to PATH" durante la instalación en Windows) o, en
+Windows, instálelo con:
 
-Computadora con Python 3.10 o posterior y un navegador web.
-VS Code es opcional. No se necesitan paquetes externos ni hardware adicional.
-Una vez instalado Python, la ejecución no requiere conexión a internet.
+   winget install Python.Python.3.12
 
-3. CÓMO EJECUTARLO
+Para verificar la versión instalada, abra una terminal (PowerShell en Windows,
+Terminal en macOS/Linux) y ejecute:
 
-a) Si recibió un ZIP, extraiga todo su contenido antes de ejecutar los archivos.
-b) Abra la carpeta TWIND42_Demo_2026-11-08 en VS Code, o abra una terminal
-   en esa carpeta. Allí deben encontrarse generar_datos.py y procesar.py.
-c) Ejecute estos comandos, uno por vez:
+   python --version
 
-   python generar_datos.py
-   python procesar.py
-   python probar_error.py
+En Windows, si el comando "python" no se reconoce, pruebe:
 
-En Windows, si el comando python no se reconoce, pruebe py en su lugar.
-Si ninguno funciona, instale Python antes de continuar.
+   py --version
+   py -0p
 
-d) Abra salida/resultados.html con un navegador. Desde PowerShell puede usar:
+("py -0p" lista las versiones de Python registradas en el lanzador). Si ninguna
+versión 3.12 aparece disponible, instálela con cualquiera de las dos opciones de
+arriba y vuelva a verificar.
+
+3. DESCARGAR O CLONAR EL REPOSITORIO
+
+Opción A — con git instalado:
+
+   git clone https://github.com/Ayulgabriel42/TWIND42_APP.git
+   cd TWIND42_APP
+
+Opción B — sin git: en la página del repositorio
+(https://github.com/Ayulgabriel42/TWIND42_APP), usar el botón verde "Code" →
+"Download ZIP", extraer el contenido del ZIP en una carpeta, y abrir una terminal en
+esa carpeta extraída.
+
+4. CREAR UN ENTORNO VIRTUAL
+
+Desde la carpeta del repositorio (donde está app.py):
+
+   python -m venv .venv
+
+Esto crea una carpeta ".venv" con un intérprete de Python aislado para este proyecto,
+sin afectar otras instalaciones de Python en la computadora. No hace falta "activar"
+el entorno: en los pasos siguientes se invoca directamente el intérprete dentro de
+".venv", lo que evita problemas de política de ejecución de PowerShell. Si se prefiere
+activarlo de la manera tradicional, en Windows (PowerShell) es:
+
+   .\.venv\Scripts\Activate.ps1
+
+(y luego usar "python" en vez de ".\.venv\Scripts\python.exe" en los comandos
+siguientes). Si PowerShell rechaza la activación por política de ejecución, use la
+invocación directa sin activar, que es la que se documenta en el resto de este
+instructivo.
+
+5. INSTALAR LAS DEPENDENCIAS (requirements.txt)
+
+   .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+
+Esto instala exactamente las tres dependencias que declara requirements.txt:
+streamlit, pandas y plotly, en las versiones fijadas en ese archivo. Requiere
+conexión a internet la primera vez.
+
+6. EJECUTAR LA APLICACIÓN STREAMLIT
+
+   .\.venv\Scripts\python.exe -m streamlit run app.py
+
+7. DIRECCIÓN LOCAL PARA ACCEDER DESDE EL NAVEGADOR
+
+Streamlit abre automáticamente una pestaña del navegador. Si no se abre sola, ingresar
+manualmente a:
+
+   http://localhost:8501
+
+La terminal queda "ocupada" mientras la aplicación está corriendo (es un servidor
+local): eso es normal, no significa que se haya colgado. Ver la sección 11 para
+cerrarla correctamente.
+
+8. CÓMO USAR LOS ARCHIVOS CSV DE EJEMPLO
+
+En el menú lateral, ir a "Configuración". En el Paso 1, con la opción "Ejemplos
+incluidos" ya seleccionada, presionar "Cargar y procesar ejemplos". Esto procesa los
+tres ensayos de ejemplo incluidos en datos_simulados/ (eólico, fotovoltaico e
+híbrido; 60 minutos de muestras cada uno, cada 5 segundos). También es posible probar
+el botón "Probar rechazo de archivo inválido", que carga a propósito un archivo con un
+dato inválido para comprobar que el sistema lo rechaza sin romperse. Para usar CSV
+propios en su lugar, elegir "Cargar CSV de prueba" y subir un ensayos.csv y un
+mediciones.csv con la estructura descripta en PROJECT_CONTEXT.md.
+
+9. RECORRIDO RECOMENDADO POR LAS CUATRO SECCIONES
+
+Para una evaluación completa, se recomienda este orden (el menú lateral permite
+moverse libremente entre ellas en cualquier momento):
+
+   1. Configuración — cargar y procesar los ejemplos incluidos (paso 8 de arriba).
+   2. Dashboard — ver el panel de control con el diagrama energético (5 nodos
+      identificados: generación eólica, generación fotovoltaica, distribución
+      energética, batería, carga LED, cada uno con tooltip al pasar el cursor) y
+      probar el simulador de escenarios (Modo: Híbrido/Eólico/Solar; Nivel: 100/50/1%).
+   3. Visualización — reproducir un ensayo con los controles Reproducir/Pausar/
+      Reiniciar, o recorrerlo manualmente con el slider "Recorrer muestras".
+   4. Resultados — consultar el balance energético final, la duración del ensayo, los
+      gráficos de potencia/energía, comparar los tres ensayos entre sí y descargar los
+      CSV de resultados.
+
+Una descripción más detallada de cada pantalla está en LEEME.md.
+
+10. RESOLUCIÓN DE PROBLEMAS HABITUALES
+
+- "python" o "py" no se reconoce como comando: Python no está instalado o no se
+  agregó al PATH. Reinstalar marcando "Add Python to PATH" (ver sección 2).
+- Error de política de ejecución al activar el entorno virtual en PowerShell: no hace
+  falta activarlo; usar siempre ".\.venv\Scripts\python.exe" como en los comandos de
+  este instructivo.
+- "Puerto 8501 ya está en uso" o similar: ya hay otra instancia de la aplicación
+  corriendo. Cerrarla (sección 11) o indicar otro puerto:
+     .\.venv\Scripts\python.exe -m streamlit run app.py --server.port 8502
+- La terminal queda imprimiendo "Stopping..." repetidamente después de Ctrl+C y no
+  vuelve al prompt: es un cuelgue conocido de Streamlit al cerrar en Windows, no indica
+  un error del programa. Cerrar directamente esa pestaña/ventana de terminal para
+  terminar el proceso, y abrir una nueva para el siguiente comando.
+- Después de editar o actualizar el código (por ejemplo, con "git pull"), los cambios
+  no se ven reflejados en el navegador: Streamlit no siempre recarga en caliente los
+  módulos importados (dashboard.py, escenarios.py, procesar.py). Cortar el servidor
+  (Ctrl+C), volver a ejecutar "streamlit run app.py", y hacer un refresco forzado del
+  navegador (Ctrl+Shift+R).
+- Un CSV propio es rechazado al cargarlo en "Cargar CSV de prueba": revisar que las
+  columnas coincidan exactamente con las esperadas (ver la estructura de datos en
+  PROJECT_CONTEXT.md) y que los valores numéricos y de fecha tengan el formato
+  correcto; el mensaje de error que muestra la aplicación indica la fila y el campo
+  específico que falló.
+
+11. CERRAR LA APLICACIÓN
+
+En la terminal donde está corriendo "streamlit run app.py", presionar Ctrl+C. Si no
+responde después de unos segundos (ver el problema de "Stopping..." en la sección 10),
+cerrar directamente esa pestaña de terminal.
+
+====================================================================
+
+A PARTIR DE ACÁ: FUNCIONALIDAD COMPLEMENTARIA (OPCIONAL)
+Procesador por línea de comandos, sin la interfaz Streamlit
+
+Este modo no es necesario para usar o evaluar la aplicación: se conserva porque sigue
+siendo válido y permite verificar el motor de cálculo de forma aislada, generando un
+informe HTML standalone.
+
+Requiere únicamente Python 3.10 o posterior; no necesita paquetes externos (no usa
+streamlit, pandas ni plotly) ni conexión a internet una vez instalado Python.
+
+   .\.venv\Scripts\python.exe generar_datos.py
+   .\.venv\Scripts\python.exe procesar.py
+   .\.venv\Scripts\python.exe probar_error.py
+
+Luego abrir salida/resultados.html con un navegador. Desde PowerShell:
 
    ii .\salida\resultados.html
 
-Si vuelve a ejecutar el procesamiento, recargue la página con Ctrl + F5.
+Si se vuelve a ejecutar el procesamiento, recargar la página con Ctrl + F5.
 
-4. ARCHIVOS
+ARCHIVOS DE ESTE MODO:
 
-generar_datos.py: crea los CSV ficticios y el ejemplo con error.
-procesar.py: valida y procesa los CSV; genera las salidas.
-probar_error.py: comprueba que el dato inválido se rechace.
-datos_simulados/ensayos.csv: configuración de las pruebas.
-datos_simulados/mediciones.csv: valores de tensión, corriente y otras variables.
+generar_datos.py: crea los CSV de ejemplo y el caso con error en datos_simulados/.
+procesar.py: valida y procesa los CSV; genera las salidas en salida/.
+probar_error.py: comprueba que un dato inválido se rechace correctamente.
+datos_simulados/ensayos.csv: configuración de los tres ensayos de ejemplo.
+datos_simulados/mediciones.csv: mediciones simuladas (tensión, corriente, etc.).
 datos_simulados/mediciones_con_error.csv: caso de prueba deliberadamente inválido.
 salida/mediciones_procesadas.csv: potencia y energía calculadas por registro.
-salida/resumen.csv: energía final por ensayo y punto.
-salida/balance.csv: balance por ensayo.
-salida/resultados.html: tablas y seis gráficos locales.
+salida/resumen.csv: energía final por ensayo y punto medido.
+salida/balance.csv: balance energético por ensayo.
+salida/resultados.html: tablas y gráficos de verificación, en un informe standalone.
 
-generar_datos.py reemplaza los archivos de ejemplo en datos_simulados.
-procesar.py reemplaza las salidas cuando completa correctamente la validación.
-No coloque datos reales en estas carpetas de demostración.
+generar_datos.py reemplaza los archivos de ejemplo en datos_simulados/ al ejecutarse.
+procesar.py reemplaza las salidas de salida/ cuando la validación se completa
+correctamente. No colocar datos reales en estas carpetas de demostración.
 
-5. CONVENCIONES Y RESULTADOS ESPERADOS
+NOTA SOBRE resultados.html: los gráficos de ese informe dibujan su eje de tiempo con
+marcas fijas en 0/15/30/45/60 minutos. Con los tres ensayos de ejemplo incluidos (que
+duran exactamente 60 minutos cada uno) el eje queda correcto; con un ensayo de otra
+duración, procesado por fuera de esta entrega, ese eje quedaría mal etiquetado. Es una
+limitación conocida y documentada (no corregida en esta intervención, por tratarse de
+una revisión exclusivamente documental; ver PROJECT_CONTEXT.md para el detalle técnico
+y la corrección recomendada).
 
-CSV en UTF-8, separado por comas y con punto decimal.
-Se incluyen tres pruebas simuladas: eólica, fotovoltaica e híbrida.
-Cada una representa 60 minutos, con muestras cada 5 segundos: 721 instantes
-por punto, incluidos el inicio y el final; 8.652 registros en total.
+CONVENCIONES Y RESULTADOS ESPERADOS (para verificar que la instalación funciona)
 
-El estado inicial de la batería es 70 %. No se calcula su porcentaje final:
-para ello harían falta su capacidad y un modelo del almacenamiento.
-Corriente positiva en batería: carga. Corriente negativa: descarga.
-En estos ejemplos la batería está cargando durante toda la prueba.
-La energía de batería se refiere al intercambio eléctrico en ese punto.
+CSV en UTF-8, separados por comas, con punto decimal. Los tres ensayos de ejemplo
+(eólico, fotovoltaico e híbrido) representan 60 minutos cada uno, con muestras cada 5
+segundos: 721 instantes por punto medido, incluidos el inicio y el final; 8.652
+registros en total entre los tres ensayos.
 
-La lámpara tiene tensión simulada de 12 V y corriente de 1,67 A:
-12 × 1,67 = 20,04 W; durante una hora, 20,04 Wh.
-La integración se realiza por la regla trapezoidal entre muestras.
+El estado inicial de batería declarado es 70 % en los tres ensayos (no se calcula un
+porcentaje final: para eso haría falta la capacidad de la batería y un modelo de
+almacenamiento, que esta demostración no incluye). Corriente positiva en el punto
+"bateria" significa carga; negativa, descarga. En estos ejemplos la batería está
+cargando durante toda la prueba.
 
-Balance ideal sin pérdidas para verificar el software:
+La carga LED simulada tiene tensión 12 V y corriente 1,67 A: 12 × 1,67 = 20,04 W;
+durante una hora, 20,04 Wh. La energía se integra con la regla trapezoidal entre
+muestras consecutivas.
+
+Balance ideal sin pérdidas (supuesto para verificar el software, no una medición real):
 
 Modo          Fuentes (Wh)   Carga (Wh)   Batería (Wh)   Residuo (Wh)
 Eólico             28,80        20,04          8,76            0,00
 Fotovoltaico       27,60        20,04          7,56            0,00
 Híbrido            30,60        20,04         10,56            0,00
 
-El residuo cero es consecuencia de cómo se construyeron los datos ficticios;
-no demuestra eficiencia real ni valida el modelo físico del sistema.
-Las oscilaciones de generación son artificiales, no curvas de los proveedores.
+El residuo igual a cero es consecuencia de cómo se construyeron los datos simulados;
+no demuestra eficiencia real ni valida ningún modelo físico. Las oscilaciones de
+generación son artificiales y reproducibles, pensadas solo para verificar los gráficos.
 
-probar_error.py debe mostrar:
-Error detectado correctamente: Fila 2: tension_v debe ser numérico; se recibió 'dato_invalido'
-PRUEBA SUPERADA: el archivo inválido fue rechazado.
+probar_error.py (línea de comandos) y el botón "Probar rechazo de archivo inválido"
+(en la app Streamlit, pantalla Configuración) deben mostrar, respectivamente:
 
-Esta prueba no modifica los resultados correctos. Rechazar este caso no
-constituye una validación exhaustiva de todos los posibles errores.
+   Error detectado correctamente: Fila 2: tension_v debe ser numérico; se recibió 'dato_invalido'
+   PRUEBA SUPERADA: el archivo inválido fue rechazado.
 
-6. PENDIENTES DEL PROYECTO
+Esta prueba no modifica los resultados correctos existentes. Rechazar este caso
+puntual no constituye una validación exhaustiva de todos los errores posibles.
+
+PRUEBA FUNCIONAL DE LA INTERFAZ (recomendada además de lo anterior)
+
+   .\.venv\Scripts\python.exe probar_interfaz.py
+
+Recorre automáticamente las 4 pantallas de la app (sin abrir un navegador real),
+carga los ejemplos, reproduce un ensayo en Visualización, verifica los balances
+esperados y la sincronización del ensayo elegido entre pantallas, y confirma el
+rechazo de un CSV inválido. Debe terminar con:
+
+   PRUEBA SUPERADA: dashboard, configuración, reproducción, resultados, balances, sincronización de ensayo y rechazo de CSV.
+
+Esta prueba no renderiza el navegador: no cubre el componente visual del Dashboard
+(HTML/CSS/JS), los tooltips ni el diseño responsive — solo confirma que la aplicación
+no lance excepciones y que los datos/estado sean los esperados.
+
+PENDIENTES DEL PROYECTO
 
 Adquisición mediante ESP32, sensores, calibración, integración física y ensayos
-experimentales. Esta entrega verifica el procesamiento con entradas simuladas.
-El uso futuro de mediciones reales requerirá nuevas comprobaciones.
+experimentales. Esta entrega verifica el procesamiento con entradas simuladas. El uso
+futuro de mediciones reales requerirá nuevas comprobaciones que esta documentación no
+cubre.

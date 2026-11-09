@@ -1,6 +1,7 @@
 # TWIND42 — Contexto del proyecto
 
 > Documento de referencia para retomar el desarrollo desde esta carpeta. No contiene credenciales ni información privada.
+> Para una presentación general del proyecto ver [`README.md`](README.md); para el recorrido guiado de las 4 pantallas, [`LEEME.md`](LEEME.md); para instalar y ejecutar paso a paso, [`INSTRUCCIONES.txt`](INSTRUCCIONES.txt).
 
 ## 1. Descripción y objetivos
 
@@ -36,7 +37,7 @@ adicionales. Todo el cálculo energético corre localmente al procesar los CSV.
 | `app_backup.py`, `app_backup_pre_dashboard.py` | Copias de seguridad de `app.py` en distintos hitos del desarrollo (antes del rediseño visual y antes de integrar el Dashboard). Se conservan como historial. |
 | `probar_interfaz.py` | Prueba funcional end-to-end con `streamlit.testing.v1.AppTest` (sin navegador). |
 | `probar_error.py` | Prueba de que `procesar.py` rechaza correctamente un CSV con datos inválidos. |
-| `.streamlit/config.toml` | Tema visual fijo (paleta de marca, ver sección 3) — evita depender del tema claro/oscuro del navegador del usuario. |
+| `.streamlit/config.toml` | Tema visual fijo (paleta de marca, ver sección 3) — evita depender del tema claro/oscuro del navegador del usuario. También fija `theme.paddingTop` (espacio extra arriba del primer elemento, para no quedar tapado por la barra de Fork/GitHub que agrega Streamlit Community Cloud sobre la app), `theme.sidebar.paddingTop` (espaciado normal del sidebar, independiente del anterior) y `client.toolbarMode = "minimal"` (oculta el menú propio de Streamlit: Deploy, Rerun, etc.; no controla la barra de Fork/GitHub, que la agrega la plataforma). |
 | `assets/` | `twind42_logo.png`, `twind42_turbina.png` — recursos gráficos oficiales, usados por `app.py` (hero/sidebar) y embebidos en base64 dentro del componente del Dashboard. |
 | `datos_simulados/` | `ensayos.csv`, `mediciones.csv` (3 ensayos de ejemplo: eólico, fotovoltaico, híbrido) y `mediciones_con_error.csv` (para la demo de rechazo de archivo inválido). |
 
@@ -59,12 +60,23 @@ replicada como variables CSS dentro del componente del Dashboard (`dashboard.py`
    cargado; (3) ajustar parámetros declarados de la sesión (estado inicial de batería,
    observaciones) y descargar `ensayos.csv`.
 3. **Visualización** — Reproducción (acelerada, no en tiempo real) de un ensayo ya
-   procesado: controles de reproducir/pausar/reiniciar, tarjetas KPI de potencia
-   instantánea por fuente, diagrama de flujo energético (Plotly Sankey) acumulado hasta
-   el instante reproducido, tabla de mediciones y gráfico de potencia.
-4. **Resultados** — Balance energético final del ensayo, diagrama de flujo completo,
-   gráficos de potencia/energía (Plotly), comparación entre los ensayos cargados y
-   descarga de `balance.csv` / `resumen.csv` / `mediciones_procesadas.csv`.
+   procesado: controles de reproducir/pausar/reiniciar, un slider "Recorrer muestras"
+   que indica explícitamente su rango (`0 a N-1`) y, debajo, una leyenda en vivo
+   ("Muestra X de N · minuto Y de Z del ensayo") para que el índice crudo del slider
+   no quede sin contexto; tarjetas KPI de potencia instantánea por fuente, diagrama de
+   flujo energético (Plotly Sankey) acumulado hasta el instante reproducido, tabla de
+   mediciones y gráfico de potencia.
+4. **Resultados** — Tarjeta "Duración del ensayo" (calculada dinámicamente a partir de
+   las marcas temporales del ensayo seleccionado, nunca un valor fijo; ver sección 5.1),
+   dos aclaraciones de alcance (el balance corresponde al período completo del ensayo,
+   independiente de dónde quedó el cursor en Visualización; y esta pantalla muestra el
+   ensayo de referencia procesado, no los escenarios hipotéticos del Dashboard), balance
+   energético final del ensayo, diagrama de flujo completo, gráficos de potencia/energía
+   (Plotly), comparación entre los ensayos cargados ("Comparar escenarios simulados": en
+   este contexto puntual "escenarios" se refiere a los distintos *ensayos de ejemplo*
+   procesados —eólico/fotovoltaico/híbrido—, no al escenario hipotético Modo/Nivel del
+   Dashboard; ver nota de terminología en la sección 5) y descarga de `balance.csv` /
+   `resumen.csv` / `mediciones_procesadas.csv`.
 
 El ensayo seleccionado se sincroniza entre las 4 pantallas vía
 `st.session_state["ensayo_seleccionado"]`.
@@ -81,6 +93,28 @@ frontend ni iframe). Se investigó y confirmó que esta API:
 La comunicación es bidireccional: los botones de Modo/Nivel del simulador llaman
 `setStateValue(...)` en JS, que actualiza `st.session_state["dashboard_escenario"]` en
 Python y dispara un rerun con los datos recalculados.
+
+### Etiquetas, tooltips y leyendas del diagrama energético
+
+El diagrama identifica sus 5 nodos (generación eólica, generación fotovoltaica,
+distribución energética, batería, carga LED) con una barra de chips justo arriba del
+SVG, en el mismo orden y colores que las conexiones del diagrama. Cada chip es a la vez
+la etiqueta visible y el disparador de un tooltip (al pasar el cursor o enfocar con
+teclado) que explica la función del nodo y muestra sus valores reales — potencia
+instantánea (W) y energía acumulada en el mismo instante (Wh), tomados directamente del
+payload ya calculado, sin interpolar ni inventar nada. Cuando el escenario simulado
+tiene déficit, los chips de Distribución/Batería/Carga pasan a un estilo con borde
+punteado de alerta, y su tooltip aclara explícitamente que esos valores son de
+referencia del ensayo original, no un suministro efectivo garantizado. Los íconos SVG
+también tienen un `<title>` nativo con el mismo texto, por si se pasa el cursor
+directamente sobre el dibujo en vez de sobre un chip.
+
+Las dos minigráficas inferiores ("Evolución de potencia (W)" y "Energía acumulada
+(Wh)") tienen su propia leyenda de colores por serie, referencias de tiempo (minuto
+inicial/final) y de unidad en los ejes, y un tooltip por cursor/teclado: al pasar el
+mouse (o enfocar el gráfico y usar las flechas izquierda/derecha) se traza una línea
+guía y se muestra, debajo del gráfico, el minuto exacto junto con el valor real de cada
+serie en ese punto — siempre la muestra real más cercana, nunca un valor interpolado.
 
 ## 5. Simulador de escenarios derivados (`escenarios.py`)
 
@@ -110,7 +144,15 @@ misma fórmula de `procesar.py`, sobre los datos ya escalados.
 | Origen | `datos_simulados/*.csv`, procesados por `procesar.py` | Transformación hipotética de un ensayo ya procesado |
 | Qué representa | Una medición simulada completa (los 4 puntos tal como se generaron) | "¿Qué pasaría si la generación fuera el X% de este mismo ensayo, en este modo?" |
 | Battería/Carga | Medidas, forman parte del balance real del ensayo | **Idénticas al ensayo de referencia**, nunca recalculadas |
-| Etiqueta en la UI | Ensayo normal (Visualización/Resultados) | Badge permanente "ESCENARIO SIMULADO — Datos derivados de ensayos de referencia" + aclaraciones explícitas (ver abajo) |
+| Etiqueta en la UI | Ensayo normal (Visualización/Resultados) | Badge permanente "ESCENARIO SIMULADO" (con el detalle completo "Datos derivados de ensayos de referencia" como tooltip nativo `title`, para no ocupar tanto espacio visual) + aclaraciones explícitas (ver abajo) |
+
+**Nota de terminología:** "escenario simulado" (singular, en el Dashboard) se refiere
+siempre al par Modo/Nivel hipotético de `escenarios.py`. En Resultados, el subtítulo
+"Comparar escenarios simulados" usa la misma palabra en un sentido distinto y ya
+existente en el código (comparar los 3 *ensayos* de ejemplo entre sí, no escenarios
+derivados) — es una coincidencia de vocabulario entre dos funcionalidades separadas,
+no una funcionalidad compartida. Documentado para quien continúe el desarrollo; no se
+modificó el código para no alterar los textos de la interfaz fuera del alcance pedido.
 
 ### Limitación del modelo energético (importante conservar esta interpretación)
 
@@ -143,6 +185,24 @@ ensayo de referencia sin escalar (es decir, cuando `modo`/`nivel` elegidos difie
 El header del Dashboard distingue explícitamente **"Ensayo de referencia: <id>"**
 (cambia solo al elegir otro ensayo) de **"Escenario seleccionado: <modo> · <nivel>%"**
 (cambia con los controles del simulador, sin alterar el ensayo de referencia).
+
+### 5.1 Duración del ensayo (pantalla Resultados)
+
+`app.py` calcula la duración real de cada ensayo a partir de sus propias marcas
+temporales ya validadas en `calcular()` (mismos instantes en los 4 puntos; `procesar.py`
+ya rechaza intervalos distintos de 5 s):
+
+```python
+minutos_totales = (marcas.max() - marcas.min()).total_seconds() / 60
+```
+
+**Nunca se asume un valor fijo de 60 minutos** (los 3 ensayos de ejemplo duran 60 min
+cada uno, pero eso es una propiedad de esos datos, no una regla del código). Se muestra
+siempre en minutos y, si el total es ≥ 60, con un desglose adicional en horas y
+minutos. Si faltaran marcas temporales válidas, se informa con un aviso en vez de
+calcular o "corregir" un tiempo en silencio. Validado también con ensayos sintéticos
+de 30 y 90 minutos (generados solo en memoria, sin tocar `datos_simulados/`), ver
+sección 8.
 
 ## 6. Dependencias
 
@@ -183,15 +243,28 @@ Para el procesador sin interfaz (opcional, genera `salida/` con los CSV de resul
 
 ## 8. Estado de las pruebas
 
-- `probar_interfaz.py` — prueba funcional completa (AppTest): navegación por las 4
-  pantallas, carga de ejemplos, reproducción, balances esperados
-  (`fuentes_wh = [28.8, 27.6, 30.6]` para SIM-EOL-01/FV-01/HIB-01), sincronización de
-  ensayo entre pantallas, rechazo de CSV inválido. **Pasa.**
+- `probar_interfaz.py` — prueba funcional completa (`streamlit.testing.v1.AppTest`, sin
+  navegador real): navegación por las 4 pantallas, carga de ejemplos, reproducción,
+  balances esperados (`fuentes_wh = [28.8, 27.6, 30.6]` para SIM-EOL-01/FV-01/HIB-01),
+  sincronización de ensayo entre pantallas, rechazo de CSV inválido. **Pasa**
+  (última corrida: 2026-11-09).
 - `probar_error.py` — confirma que `procesar.py` rechaza `mediciones_con_error.csv`
-  por `tension_v` inválido. **Pasa.**
-- Verificación manual en navegador: las 4 pantallas, los 9 escenarios del simulador
-  (3 modos × 3 niveles) con sus etiquetas, descargas CSV, diseño responsive
+  por `tension_v` inválido. **Pasa** (última corrida: 2026-11-09).
+- **Límite importante de `probar_interfaz.py`:** `AppTest` ejecuta el script Python de
+  `app.py` y verifica estado/excepciones, pero **no renderiza** el componente
+  `st.components.v2.component` del Dashboard (HTML/CSS/JS inline) ni Plotly como lo
+  haría un navegador real. Por lo tanto, los tooltips del diagrama, las minigráficas
+  del Dashboard, los tooltips de los gráficos de Visualización/Resultados y el diseño
+  responsive **no quedan cubiertos** por esta prueba automática; solo se verifica que
+  la aplicación no lance excepciones.
+- Verificación manual en navegador (sesiones de desarrollo previas, antes de las
+  últimas modificaciones documentales): las 4 pantallas, los 9 escenarios del
+  simulador (3 modos × 3 niveles) con sus etiquetas, descargas CSV, diseño responsive
   (escritorio y móvil vía container queries), sin errores de consola.
+- Validación ad hoc (script fuera del repo, no forma parte de la suite oficial) de la
+  tarjeta "Duración del ensayo": confirmó 60.0 min para los 3 ensayos reales y, con
+  ensayos sintéticos generados solo en memoria, 30.0 min y 90.0 min (este último con el
+  desglose en horas), sin modificar `datos_simulados/`.
 
 ## 9. Restricciones vigentes para quien continúe el desarrollo
 
@@ -203,4 +276,12 @@ Para el procesador sin interfaz (opcional, genera `salida/` con los CSV de resul
 - Esta carpeta (`C:\Proyectos\TWIND42_app`) es ahora la ubicación de desarrollo activo.
   La carpeta original en `C:\Users\ayulg\.codex\.chatgpt-projects\...\demo_twind42`
   queda como respaldo histórico y no debería seguir editándose.
-- Todavía no se publicó en GitHub ni en Streamlit Community Cloud.
+- El repositorio está publicado en GitHub:
+  <https://github.com/Ayulgabriel42/TWIND42_APP> (público, rama `master`). También hay
+  una instancia desplegada en Streamlit Community Cloud
+  (<https://twind42app.streamlit.app/>); al intentar acceder sin sesión iniciada en
+  Streamlit, la plataforma redirige a una pantalla de autenticación propia de
+  Streamlit Cloud — confirmar con el autor si el acceso público está habilitado antes
+  de compartir ese enlace con la Comisión Académica Evaluadora. La vía de ejecución
+  más confiable para una evaluación sigue siendo correr la app localmente (ver
+  `INSTRUCCIONES.txt`).
