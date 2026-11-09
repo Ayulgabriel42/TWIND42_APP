@@ -193,11 +193,11 @@ HTML = """
   <section class="tw-kpis">
     <div class="tw-kpi" data-accent="c-cian"><span class="l">Potencia eólica</span><span class="v v-pot-eolico"></span></div>
     <div class="tw-kpi" data-accent="c-verde"><span class="l">Potencia fotovoltaica</span><span class="v v-pot-fotovoltaico"></span></div>
-    <div class="tw-kpi" data-accent="c-ambar"><span class="l v-lbl-carga">Potencia carga LED</span><span class="v v-pot-carga"></span></div>
     <div class="tw-kpi" data-accent="c-violeta">
       <span class="l v-lbl-bateria">Potencia batería</span><span class="v v-pot-bateria"></span><span class="tag v-tag-bateria"></span>
       <span class="tw-aclaracion v-aclaracion-bateria"></span>
     </div>
+    <div class="tw-kpi" data-accent="c-ambar"><span class="l v-lbl-carga">Potencia carga LED</span><span class="v v-pot-carga"></span></div>
   </section>
 
   <section class="tw-lower">
