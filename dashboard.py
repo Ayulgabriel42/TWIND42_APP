@@ -119,6 +119,24 @@ HTML = """
   </section>
 
   <section class="tw-flow-card">
+    <div class="tw-node-tags" role="group" aria-label="Nodos del diagrama energético: tocá o enfocá cada uno para ver su función y sus valores">
+      <button type="button" class="tw-node-tag" data-nodo="eolico" aria-describedby="tw-tip">
+        <i class="dot c-cian" aria-hidden="true"></i>Generación eólica
+      </button>
+      <button type="button" class="tw-node-tag" data-nodo="fotovoltaico" aria-describedby="tw-tip">
+        <i class="dot c-verde" aria-hidden="true"></i>Generación fotovoltaica
+      </button>
+      <button type="button" class="tw-node-tag" data-nodo="distribucion" aria-describedby="tw-tip">
+        <i class="dot c-sec" aria-hidden="true"></i>Distribución energética
+      </button>
+      <button type="button" class="tw-node-tag" data-nodo="bateria" aria-describedby="tw-tip">
+        <i class="dot c-violeta" aria-hidden="true"></i><span class="v-tagname-bateria">Batería</span>
+      </button>
+      <button type="button" class="tw-node-tag" data-nodo="carga" aria-describedby="tw-tip">
+        <i class="dot c-ambar" aria-hidden="true"></i><span class="v-tagname-carga">Carga LED</span>
+      </button>
+    </div>
+    <div class="tw-tip" id="tw-tip" role="tooltip" hidden></div>
     <svg class="tw-flow" viewBox="0 0 760 240" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
       <path class="tw-path" data-path="eolico" d="M118,66 C250,66 250,120 368,120"></path>
       <path class="tw-path" data-path="fotovoltaico" d="M118,174 C250,174 250,120 368,120"></path>
@@ -169,24 +187,6 @@ HTML = """
         <line x1="-7" y1="14" x2="7" y2="14" class="tw-bulbo-base"></line>
       </g>
     </svg>
-    <div class="tw-node-tags" role="group" aria-label="Nodos del diagrama energético: tocá o enfocá cada uno para ver su función y sus valores">
-      <button type="button" class="tw-node-tag" data-nodo="eolico" aria-describedby="tw-tip">
-        <i class="dot c-cian" aria-hidden="true"></i>Generación eólica
-      </button>
-      <button type="button" class="tw-node-tag" data-nodo="fotovoltaico" aria-describedby="tw-tip">
-        <i class="dot c-verde" aria-hidden="true"></i>Generación fotovoltaica
-      </button>
-      <button type="button" class="tw-node-tag" data-nodo="distribucion" aria-describedby="tw-tip">
-        <i class="dot c-sec" aria-hidden="true"></i>Distribución energética
-      </button>
-      <button type="button" class="tw-node-tag" data-nodo="bateria" aria-describedby="tw-tip">
-        <i class="dot c-violeta" aria-hidden="true"></i><span class="v-tagname-bateria">Batería</span>
-      </button>
-      <button type="button" class="tw-node-tag" data-nodo="carga" aria-describedby="tw-tip">
-        <i class="dot c-ambar" aria-hidden="true"></i><span class="v-tagname-carga">Carga LED</span>
-      </button>
-    </div>
-    <div class="tw-tip" id="tw-tip" role="tooltip" hidden></div>
     <p class="tw-flow-caption">Instantánea simulada · minuto <b class="v-min"></b> del ensayo (no es una medición en tiempo real)</p>
   </section>
 
@@ -569,7 +569,10 @@ export default function (component) {
         const maxLeft = Math.max(8, rc.width - tip.offsetWidth - 8);
         const left = Math.min(Math.max(8, rb.left - rc.left), maxLeft);
         tip.style.left = left + 'px';
-        tip.style.top = Math.max(4, rb.top - rc.top - tip.offsetHeight - 8) + 'px';
+        // Se ubica arriba del chip si hay lugar; si no (por ejemplo, con la barra
+        // pegada al borde superior de la tarjeta), se ubica debajo.
+        const arriba = rb.top - rc.top - tip.offsetHeight - 8;
+        tip.style.top = (arriba >= 4 ? arriba : rb.bottom - rc.top + 8) + 'px';
     }
     function ocultarTip() { tip.hidden = true; }
     qa('.tw-node-tag').forEach((boton) => {
