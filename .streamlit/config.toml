@@ -6,9 +6,10 @@ secondaryBackgroundColor = "#111E34"
 textColor = "#F4F7FC"
 font = "sans serif"
 # Espacio extra arriba del primer elemento (el aviso "DATOS SIMULADOS"), para que no
-# quede pegado a la barra de Fork/GitHub que agrega Streamlit Community Cloud sobre
-# la app. El valor por defecto de Streamlit es ~6rem; acá se suma un poco más.
-paddingTop = "7.5rem"
+# quede tapado por la barra de Share/Fork/GitHub que agrega Streamlit Community Cloud
+# sobre la app. El valor por defecto de Streamlit es ~6rem; 7.5rem no alcanzó a
+# despejar esa barra en el despliegue real, así que se aumenta un poco más.
+paddingTop = "10rem"
 
 [theme.sidebar]
 # Sin esto, el sidebar (logo + navegación) hereda el mismo paddingTop de arriba y
