@@ -5,3 +5,18 @@ backgroundColor = "#080F21"
 secondaryBackgroundColor = "#111E34"
 textColor = "#F4F7FC"
 font = "sans serif"
+# Espacio extra arriba del primer elemento (el aviso "DATOS SIMULADOS"), para que no
+# quede pegado a la barra de Fork/GitHub que agrega Streamlit Community Cloud sobre
+# la app. El valor por defecto de Streamlit es ~6rem; acá se suma un poco más.
+paddingTop = "7.5rem"
+
+[theme.sidebar]
+# Sin esto, el sidebar (logo + navegación) hereda el mismo paddingTop de arriba y
+# queda empujado muy abajo. Se lo deja con un espaciado normal, independiente del
+# área principal.
+paddingTop = "1rem"
+
+[client]
+# Oculta el menú propio de la app (Deploy, Rerun, etc.). No controla la barra de
+# Fork/GitHub de Streamlit Community Cloud: esa la agrega la plataforma, no la app.
+toolbarMode = "minimal"
