@@ -98,7 +98,7 @@ HTML = """
   </header>
 
   <section class="tw-controles">
-    <span class="tw-escenario-badge">ESCENARIO SIMULADO — Datos derivados de ensayos de referencia</span>
+    <span class="tw-escenario-badge" title="Datos derivados de ensayos de referencia">ESCENARIO SIMULADO</span>
     <span class="tw-ensayo tw-ensayo-escenario v-ensayo-escenario"></span>
     <div class="tw-control-grupo">
       <span class="tw-control-label">Modo</span>
