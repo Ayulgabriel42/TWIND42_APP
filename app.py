@@ -228,7 +228,9 @@ st.set_page_config(page_title="TWIND42 · Demo", page_icon="🌬️", layout="wi
 # fondo fijo que pueda combinar mal, y toda la interfaz respeta la misma identidad de marca.
 st.markdown(f"""<style>
     :root {{ --twind-text-secondary:{TEXTO_SEC}; }}
-    .block-container {{max-width:1200px;padding-top:1.5rem;}}
+    /* padding-top de sobra: en Streamlit Community Cloud la barra de Share/Fork/GitHub
+       se superpone sobre esta zona; sin este margen el primer aviso queda pegado a ella. */
+    .block-container {{max-width:1200px;padding-top:5rem;}}
     h2,h3 {{color:var(--text-color);letter-spacing:0.01em;border-left:4px solid var(--primary-color);padding-left:0.6rem;}}
     .tw-tagline {{color:var(--twind-text-secondary);font-size:1.05rem;margin-top:-0.3rem;}}
 
