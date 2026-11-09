@@ -9,7 +9,8 @@ TWIND42 es un prototipo tecnológico académico para el Trabajo Final de Graduac
 Licenciatura en Inteligencia Artificial y Robótica (Universidad Siglo 21). El título
 académico del proyecto es:
 
-> "Desarrollo de un sistema inteligente para generación, monitoreo y análisis energético urbano".
+> "Microgeneración híbrida eólico-fotovoltaica para el aprovechamiento de recursos
+> renovables en el corredor urbano-vial de la Ruta Nacional N.º 3, Comodoro Rivadavia".
 
 El proyecto simula el funcionamiento energético de un sistema híbrido eólico-solar con
 almacenamiento en batería y una carga LED, usando **datos simulados** (no hay conexión a
@@ -130,8 +131,8 @@ calculados por `procesar.py`** para un ensayo de referencia y:
   cero si esa fuente está desactivada por el modo).
 - Reintegra `energia_wh` con la **misma regla trapezoidal** de `procesar.py`.
 - **No toca** `rpm`, `velocidad_viento`, `irradiancia`, `tensión_v` ni `corriente_a`
-  (son condiciones físicas medidas, no se reinterpretan).
-- **No toca carga ni batería**: quedan exactamente como fueron medidas en el ensayo de
+  (son condiciones físicas del ensayo de referencia, no se reinterpretan).
+- **No toca carga ni batería**: quedan exactamente como están en el ensayo de
   referencia.
 
 `escenarios.balance_escenario(...)` recalcula `fuentes/carga/batería/residuo` con la
@@ -143,7 +144,7 @@ misma fórmula de `procesar.py`, sobre los datos ya escalados.
 |---|---|---|
 | Origen | `datos_simulados/*.csv`, procesados por `procesar.py` | Transformación hipotética de un ensayo ya procesado |
 | Qué representa | Una medición simulada completa (los 4 puntos tal como se generaron) | "¿Qué pasaría si la generación fuera el X% de este mismo ensayo, en este modo?" |
-| Battería/Carga | Medidas, forman parte del balance real del ensayo | **Idénticas al ensayo de referencia**, nunca recalculadas |
+| Battería/Carga | Registros del ensayo simulado, forman parte de su balance | **Idénticas al ensayo de referencia**, nunca recalculadas |
 | Etiqueta en la UI | Ensayo normal (Visualización/Resultados) | Badge permanente "ESCENARIO SIMULADO" (con el detalle completo "Datos derivados de ensayos de referencia" como tooltip nativo `title`, para no ocupar tanto espacio visual) + aclaraciones explícitas (ver abajo) |
 
 **Nota de terminología:** "escenario simulado" (singular, en el Dashboard) se refiere
@@ -156,8 +157,8 @@ modificó el código para no alterar los textos de la interfaz fuera del alcance
 
 ### Limitación del modelo energético (importante conservar esta interpretación)
 
-`bateria_wh`, en `procesar.py`, es una magnitud **medida** (integrada de tensión ×
-corriente en el punto "batería" del CSV) — **no** es una variable que el balance
+`bateria_wh`, en `procesar.py`, es una magnitud **integrada directamente del CSV**
+(tensión × corriente en el punto "batería") — **no** es una variable que el balance
 recalcule para "cerrar" la ecuación. La fórmula es:
 
 ```
@@ -262,9 +263,9 @@ Para el procesador sin interfaz (opcional, genera `salida/` con los CSV de resul
   simulador (3 modos × 3 niveles) con sus etiquetas, descargas CSV, diseño responsive
   (escritorio y móvil vía container queries), sin errores de consola.
 - Validación ad hoc (script fuera del repo, no forma parte de la suite oficial) de la
-  tarjeta "Duración del ensayo": confirmó 60.0 min para los 3 ensayos reales y, con
-  ensayos sintéticos generados solo en memoria, 30.0 min y 90.0 min (este último con el
-  desglose en horas), sin modificar `datos_simulados/`.
+  tarjeta "Duración del ensayo": confirmó 60.0 min para los 3 ensayos simulados
+  incluidos y, con ensayos sintéticos adicionales generados solo en memoria, 30.0 min
+  y 90.0 min (este último con el desglose en horas), sin modificar `datos_simulados/`.
 
 ## 9. Restricciones vigentes para quien continúe el desarrollo
 

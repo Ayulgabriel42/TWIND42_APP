@@ -43,16 +43,17 @@ inventados o interpolados.
 (Híbrido, Eólico o Solar) y un **Nivel** de generación simulada (100 %, 50 % o 1 %).
 Esto construye un *escenario hipotético derivado* del ensayo de referencia
 seleccionado (badge "ESCENARIO SIMULADO"): reescala la potencia eólica y/o
-fotovoltaica del ensayo real, pero **nunca toca la carga ni la batería**, que quedan
-exactamente como fueron medidas. El header distingue siempre "Ensayo de referencia:
-`<id>`" (el ensayo real elegido) de "Escenario seleccionado: `<modo>` · `<nivel>`%" (el
-recorte hipotético sobre ese ensayo).
+fotovoltaica del ensayo de referencia, pero **nunca toca la carga ni la batería**, que
+quedan exactamente como están registradas. El header distingue siempre "Ensayo de
+referencia: `<id>`" (el ensayo de referencia elegido) de "Escenario seleccionado:
+`<modo>` · `<nivel>`%" (el recorte hipotético sobre ese ensayo).
 
 Cuando la generación simulada no alcanza a cubrir la demanda (escenario con déficit),
 los nodos de Distribución/Batería/Carga pasan a un estilo con borde punteado de alerta,
 sus etiquetas cambian a "Batería de referencia" / "Demanda de referencia", y sus
 tooltips aclaran explícitamente que esos valores no representan un suministro efectivo
-garantizado — son los valores medidos del ensayo original, no recalculados.
+garantizado — son los valores del conjunto de datos original del ensayo de referencia,
+no recalculados.
 
 **Tarjetas e indicadores.** Potencia eólica, potencia fotovoltaica, potencia batería
 (con tag "Cargando"/"Descargando"/"Sin intercambio") y potencia carga LED, cada una con

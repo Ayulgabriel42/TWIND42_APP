@@ -1,8 +1,10 @@
 # TWIND42
 
-Sistema inteligente para generación, monitoreo y análisis energético urbano — prototipo
-académico para el Trabajo Final de Graduación (TFG) de la Licenciatura en Inteligencia
-Artificial y Robótica (Universidad Siglo 21).
+Prototipo académico desarrollado para el Trabajo Final de Graduación (TFG) de la
+Licenciatura en Inteligencia Artificial y Robótica (Universidad Siglo 21), titulado:
+
+> "Microgeneración híbrida eólico-fotovoltaica para el aprovechamiento de recursos
+> renovables en el corredor urbano-vial de la Ruta Nacional N.º 3, Comodoro Rivadavia".
 
 > **Datos simulados.** Esta versión del proyecto trabaja exclusivamente con archivos
 > CSV simulados. No hay conexión a un ESP32 ni a ningún sensor físico, y nada de lo que
