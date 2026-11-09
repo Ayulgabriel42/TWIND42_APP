@@ -353,8 +353,17 @@ if pantalla == "Visualización":
         st.session_state["reproduciendo"] = False
     if c3.button("Reiniciar"):
         st.session_state.update(cursor=0, reproduciendo=False)
+    total_muestras = len(instantes)
+    duracion_min = (instantes[-1] - instantes[0]).total_seconds() / 60
     if not st.session_state.get("reproduciendo", False):
-        st.session_state["cursor"] = st.slider("Recorrer muestras", 0, len(instantes)-1, st.session_state["cursor"])
+        st.session_state["cursor"] = st.slider(
+            f"Recorrer muestras (0 a {total_muestras - 1})", 0, total_muestras - 1, st.session_state["cursor"]
+        )
+        minuto_actual = (instantes[st.session_state["cursor"]] - instantes[0]).total_seconds() / 60
+        st.caption(
+            f"Muestra {st.session_state['cursor']} de {total_muestras - 1} · minuto {minuto_actual:.1f} de "
+            f"{duracion_min:.1f} del ensayo."
+        )
     st.caption("Reproducción acelerada: 1 segundo de pantalla equivale a 1 minuto del ensayo. Cada muestra original representa 5 segundos.")
 
     @st.fragment(run_every=1 if st.session_state.get("reproduciendo") else None)
@@ -403,6 +412,36 @@ else:
     st.session_state["ensayo_seleccionado"] = eid
     datos = r["datos"][r["datos"]["id_ensayo"] == eid]
     balance = r["balance"].set_index("id_ensayo").loc[eid]
+
+    # Duración real del ensayo, calculada a partir de sus propias marcas temporales ya
+    # validadas en calcular() (mismos instantes en los 4 puntos, sin huecos: procesar.py
+    # ya rechaza intervalos distintos de 5 s). Nunca se asume un valor fijo de 60 minutos;
+    # si faltaran marcas válidas, se avisa en vez de inventar o corregir un tiempo.
+    marcas = datos["fecha_hora"]
+    columna_duracion = st.columns(4)[0]
+    if marcas.empty or marcas.isna().any():
+        columna_duracion.warning("No se pudo calcular la duración: faltan marcas temporales válidas para este ensayo.")
+    else:
+        minutos_totales = (marcas.max() - marcas.min()).total_seconds() / 60
+        valor_duracion = f"{minutos_totales:.1f} min"
+        if minutos_totales >= 60:
+            horas = int(minutos_totales // 60)
+            minutos_resto = minutos_totales - horas * 60
+            valor_duracion += (
+                '<div style="font-size:0.95rem;font-weight:500;color:var(--twind-text-secondary);'
+                f'margin-top:2px;">{horas} h {minutos_resto:.1f} min</div>'
+            )
+        tarjeta_kpi(columna_duracion, "Duración del ensayo", valor_duracion, CIAN)
+
+    st.caption(
+        "Los indicadores y balances corresponden al período completo del ensayo seleccionado, "
+        "independientemente del punto de reproducción en Visualización."
+    )
+    st.caption(
+        "Esta sección presenta los resultados del ensayo de referencia procesado. Los escenarios "
+        "hipotéticos del Dashboard no modifican estos valores."
+    )
+
     columnas = st.columns(4)
     for columna, campo, nombre, color in zip(columnas, ["fuentes_wh", "carga_wh", "bateria_wh", "residuo_wh"], ["Fuentes", "Carga LED", "Batería (neta)", "Residuo"], [CIAN, AMBAR, VIOLETA, TEXTO_SEC]):
         tarjeta_kpi(columna, nombre, f"{balance[campo]:.2f} Wh", color)
